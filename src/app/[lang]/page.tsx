@@ -143,6 +143,30 @@ function HomeContent() {
     };
   }, []);
 
+  // Scroll Reveal System (IntersectionObserver)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("reveal-active");
+          }
+        });
+      },
+      {
+        threshold: 0.05,
+        rootMargin: "0px 0px -50px 0px",
+      }
+    );
+
+    const elements = document.querySelectorAll(".scroll-reveal");
+    elements.forEach((el) => observer.observe(el));
+
+    return () => {
+      elements.forEach((el) => observer.unobserve(el));
+    };
+  }, [catalog.plans]);
+
   useEffect(() => {
     fetchCatalog()
       .then((response) => setCatalog(normalizeCatalog(response)))
@@ -193,7 +217,12 @@ function HomeContent() {
 
   return (
     <LayoutShell>
-      <main>
+      <main style={{ position: "relative", overflow: "hidden" }}>
+        {/* Futuristic Scrolling Background Ambient Glows */}
+        <div className="scroll-bg-glow glow-1" />
+        <div className="scroll-bg-glow glow-2" />
+        <div className="scroll-bg-glow glow-3" />
+
         <section className="hero container" id="top">
           <div className="hero-split-wrapper">
             
@@ -383,7 +412,7 @@ function HomeContent() {
         <hr className="section-divider container" />
 
         <section className="section container" id="plans">
-          <div className="section-header">
+          <div className="section-header scroll-reveal">
             <div className="section-label">
               <Zap size={14} /> {t("pricing")}
             </div>
@@ -394,8 +423,15 @@ function HomeContent() {
           </div>
 
           <div className="plan-grid">
-            {catalog.plans.map((plan) => (
-              <PlanCard key={plan.slug} plan={plan} featured={plan.slug === "pro"} formatPrice={formatPrice} t={t} />
+            {catalog.plans.map((plan, index) => (
+              <PlanCard
+                key={plan.slug}
+                plan={plan}
+                featured={plan.slug === "pro"}
+                formatPrice={formatPrice}
+                t={t}
+                className={`scroll-reveal stagger-${index + 1}`}
+              />
             ))}
           </div>
         </section>
@@ -403,7 +439,7 @@ function HomeContent() {
         <hr className="section-divider container" />
 
         <section className="section container" id="platform">
-          <div className="section-header">
+          <div className="section-header scroll-reveal">
             <div className="section-label">
               <ServerCog size={14} /> {t("platformTitle")}
             </div>
@@ -418,21 +454,25 @@ function HomeContent() {
               icon={<Layers size={20} />}
               title={t("feat1Title")}
               body={t("feat1Body")}
+              className="scroll-reveal stagger-1"
             />
             <FeatureCard
               icon={<ShieldCheck size={20} />}
               title={t("feat2Title")}
               body={t("feat2Body")}
+              className="scroll-reveal stagger-2"
             />
             <FeatureCard
               icon={<Cloud size={20} />}
               title={t("feat3Title")}
               body={t("feat3Body")}
+              className="scroll-reveal stagger-3"
             />
             <FeatureCard
               icon={<LifeBuoy size={20} />}
               title={t("feat4Title")}
               body={t("feat4Body")}
+              className="scroll-reveal stagger-4"
             />
           </div>
         </section>
@@ -440,7 +480,7 @@ function HomeContent() {
         <hr className="section-divider container" />
 
         <section className="section container" id="onboarding">
-          <div className="section-header">
+          <div className="section-header scroll-reveal">
             <div className="section-label">
               <LayoutDashboard size={14} /> {t("timeline")}
             </div>
@@ -448,17 +488,17 @@ function HomeContent() {
           </div>
 
           <div className="timeline">
-            <TimelineItem step="01" title={t("timeline1Title")} body={t("timeline1Body")} />
-            <TimelineItem step="02" title={t("timeline2Title")} body={t("timeline2Body")} />
-            <TimelineItem step="03" title={t("timeline3Title")} body={t("timeline3Body")} />
-            <TimelineItem step="04" title={t("timeline4Title")} body={t("timeline4Body")} />
+            <TimelineItem step="01" title={t("timeline1Title")} body={t("timeline1Body")} className="scroll-reveal stagger-1" />
+            <TimelineItem step="02" title={t("timeline2Title")} body={t("timeline2Body")} className="scroll-reveal stagger-2" />
+            <TimelineItem step="03" title={t("timeline3Title")} body={t("timeline3Body")} className="scroll-reveal stagger-3" />
+            <TimelineItem step="04" title={t("timeline4Title")} body={t("timeline4Body")} className="scroll-reveal stagger-4" />
           </div>
         </section>
 
         <hr className="section-divider container" />
 
         <section className="cta-section container" id="launch">
-          <div className="cta-wrapper">
+          <div className="cta-wrapper scroll-reveal">
             <div className="cta-copy">
               <div className="section-label">
                 <ArrowRight size={14} /> {t("getStarted")}
@@ -523,11 +563,13 @@ function PlanCard({
   featured,
   formatPrice,
   t,
+  className = "",
 }: {
   plan: HostingPlan;
   featured: boolean;
   formatPrice: (usdPrice: number) => React.ReactNode;
   t: (key: string) => string;
+  className?: string;
 }) {
   const tDescription = () => {
     if (plan.slug === "basic") return t("basic_desc") !== "basic_desc" ? t("basic_desc") : plan.description;
@@ -537,7 +579,7 @@ function PlanCard({
   };
 
   return (
-    <article className={`plan-card${featured ? " featured" : ""}`}>
+    <article className={`plan-card${featured ? " featured" : ""} ${className}`}>
       <span className={`plan-tag ${featured ? "popular" : "default"}`}>
         {featured ? t("mostPopular") : t("starter")}
       </span>
@@ -576,13 +618,15 @@ function FeatureCard({
   icon,
   title,
   body,
+  className = "",
 }: {
   icon: React.ReactNode;
   title: string;
   body: string;
+  className?: string;
 }) {
   return (
-    <article className="feature-card">
+    <article className={`feature-card ${className}`}>
       <div className="feature-icon">{icon}</div>
       <h3>{title}</h3>
       <p>{body}</p>
@@ -594,13 +638,15 @@ function TimelineItem({
   step,
   title,
   body,
+  className = "",
 }: {
   step: string;
   title: string;
   body: string;
+  className?: string;
 }) {
   return (
-    <article className="timeline-item">
+    <article className={`timeline-item ${className}`}>
       <span className="timeline-step">{step}</span>
       <div>
         <h3>{title}</h3>
