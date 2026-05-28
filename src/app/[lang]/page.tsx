@@ -99,6 +99,35 @@ function HomeContent() {
   const [formError, setFormError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // 3D Card Tilt State
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    // Rotate up to 15 degrees
+    const rotateX = ((centerY - y) / centerY) * 15;
+    const rotateY = ((x - centerX) / centerX) * 15;
+    
+    setTilt({ x: rotateX, y: rotateY });
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setTilt({ x: 0, y: 0 });
+  };
+
   // Scroll Position tracking for 3D Parallax
   useEffect(() => {
     const handleScroll = () => {
@@ -208,12 +237,46 @@ function HomeContent() {
             {/* Right Pane - 3D Cyber-Monkey Code Station */}
             <div className="hero-right-pane">
               <div className="wireframe-scroll-grid" />
-              <div className="monkey-card-wrapper">
-                <div className="monkey-card">
+              <div 
+                className="monkey-card-wrapper"
+                onMouseMove={handleMouseMove}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                <div 
+                  className="monkey-card"
+                  style={{
+                    transform: isHovered
+                      ? `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale3d(1.03, 1.03, 1.03)`
+                      : 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)'
+                  }}
+                >
                   <div className="monkey-card-inner">
                     <img src="/monkey.png" alt="3D Cyber Coding Monkey" className="monkey-image" />
                     <div className="glasses-glow" />
                     <div className="console-screen-glow" />
+                    
+                    {/* Laser scanning line */}
+                    <div className="cyber-scanline" />
+                    
+                    {/* Rotating HUD circle */}
+                    <div className="hud-ring" />
+                    
+                    {/* Luminous Sparks */}
+                    <div className="typing-sparks">
+                      <span className="typing-spark spark-1" />
+                      <span className="typing-spark spark-2" />
+                      <span className="typing-spark spark-3" />
+                      <span className="typing-spark spark-4" />
+                      <span className="typing-spark spark-5" />
+                    </div>
+
+                    {/* Cyber Neon Keyboard */}
+                    <div className="cyber-keyboard">
+                      {Array.from({ length: 15 }).map((_, i) => (
+                        <span key={i} className={`key key-${(i % 5) + 1}`} />
+                      ))}
+                    </div>
                   </div>
                 </div>
 
