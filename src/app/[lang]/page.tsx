@@ -65,6 +65,27 @@ export default function App({ params }: { params: { lang: string } }) {
   );
 }
 
+function Typewriter({ text, delay = 50 }: { text: string; delay?: number }) {
+  const [displayedText, setDisplayedText] = useState("");
+  
+  useEffect(() => {
+    let index = 0;
+    setDisplayedText("");
+    const interval = setInterval(() => {
+      if (index < text.length) {
+        setDisplayedText((prev) => prev + text.charAt(index));
+        index++;
+      } else {
+        clearInterval(interval);
+      }
+    }, delay);
+    
+    return () => clearInterval(interval);
+  }, [text, delay]);
+  
+  return <span>{displayedText}</span>;
+}
+
 function HomeContent() {
   const router = useRouter();
   const { t, formatPrice } = useLocalization();
@@ -77,6 +98,21 @@ function HomeContent() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Scroll Position tracking for 3D Parallax
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      document.documentElement.style.setProperty("--scroll-y", `${scrollY}px`);
+    };
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     fetchCatalog()
@@ -130,38 +166,110 @@ function HomeContent() {
     <LayoutShell>
       <main>
         <section className="hero container" id="top">
-          <div className="hero-badge">
-            <span className="dot" />
-            {t("builtForVibeCoders")}
-          </div>
-          <h1>
-            {t("heroTitle").split("").map((char, index) => (
-              <span
-                key={index}
-                style={{ animationDelay: `${index * 0.05}s` }}
-                className="reveal-char"
-              >
-                {char === " " ? "\u00A0" : char}
-              </span>
-            ))}
-          </h1>
-          <p className="hero-sub">
-            {t("heroSub")}
-          </p>
-          <div className="tech-stack">
-            <span className="tech-pill">.NET / ASP.NET</span>
-            <span className="tech-pill">Python</span>
-            <span className="tech-pill">PHP</span>
-            <span className="tech-pill">Spring Boot</span>
-            <span className="tech-pill">{t("staticSites")}</span>
-          </div>
-          <div className="hero-actions">
-            <a className="btn btn-primary btn-lg" href="#launch">
-              {t("startDeploying")} <ArrowRight size={18} />
-            </a>
-            <a className="btn btn-secondary btn-lg" href={`${customerPanelUrl}/login`} target="_blank" rel="noreferrer">
-              {t("controlPanel")}
-            </a>
+          <div className="hero-split-wrapper">
+            
+            {/* Left Pane - Content */}
+            <div className="hero-left-pane">
+              <div className="hero-badge">
+                <span className="dot" />
+                {t("builtForVibeCoders")}
+              </div>
+              <h1>
+                {t("heroTitle").split("").map((char, index) => (
+                  <span
+                    key={index}
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                    className="reveal-char"
+                  >
+                    {char === " " ? "\u00A0" : char}
+                  </span>
+                ))}
+              </h1>
+              <p className="hero-sub">
+                {t("heroSub")}
+              </p>
+              <div className="tech-stack">
+                <span className="tech-pill">.NET / ASP.NET</span>
+                <span className="tech-pill">Python</span>
+                <span className="tech-pill">PHP</span>
+                <span className="tech-pill">Spring Boot</span>
+                <span className="tech-pill">{t("staticSites")}</span>
+              </div>
+              <div className="hero-actions">
+                <a className="btn btn-primary btn-lg" href="#launch">
+                  {t("startDeploying")} <ArrowRight size={18} />
+                </a>
+                <a className="btn btn-secondary btn-lg" href={`${customerPanelUrl}/login`} target="_blank" rel="noreferrer">
+                  {t("controlPanel")}
+                </a>
+              </div>
+            </div>
+
+            {/* Right Pane - 3D Cyber-Monkey Code Station */}
+            <div className="hero-right-pane">
+              <div className="wireframe-scroll-grid" />
+              <div className="monkey-card-wrapper">
+                <div className="monkey-card">
+                  <div className="monkey-card-inner">
+                    <img src="/monkey.png" alt="3D Cyber Coding Monkey" className="monkey-image" />
+                    <div className="glasses-glow" />
+                    <div className="console-screen-glow" />
+                  </div>
+                </div>
+
+                {/* Floating Parallax Code Blocks */}
+                <div className="floating-code-block block-terminal">
+                  <div className="console-header">
+                    <span className="dot red" />
+                    <span className="dot yellow" />
+                    <span className="dot green" />
+                    <span className="console-title">bash</span>
+                  </div>
+                  <div className="console-content">
+                    <div className="cmd-line"><span className="prompt">$</span> vibe deploy --app main-web</div>
+                    <div className="cmd-output"><Typewriter text="Deploying Spring Boot application..." delay={40} /></div>
+                    <div className="cmd-output green-text"><Typewriter text="✔ Deployment successful!" delay={30} /></div>
+                  </div>
+                </div>
+
+                <div className="floating-code-block block-json">
+                  <div className="console-header">
+                    <span className="console-icon">{}</span>
+                    <span className="console-title">vibe.json</span>
+                  </div>
+                  <div className="console-content">
+                    <pre>
+                      <code>
+{`{
+  "app": "vibe-host",
+  "status": "`}
+<span className="green-text"><Typewriter text="online" delay={100} /></span>
+{`",
+  "regions": ["global"]
+}`}
+                      </code>
+                    </pre>
+                  </div>
+                </div>
+
+                <div className="floating-code-block block-api">
+                  <div className="console-header">
+                    <span className="console-icon">JS</span>
+                    <span className="console-title">server.js</span>
+                  </div>
+                  <div className="console-content">
+                    <code>
+                      <span className="purple-text">const</span> express = <span className="blue-text">require</span>(<span className="orange-text">'express'</span>);<br />
+                      app.<span className="blue-text">listen</span>(<span className="gold-text">3000</span>, () =&gt; &#123;<br />
+                      &nbsp;&nbsp;console.<span className="blue-text">log</span>(<span className="green-text">'<Typewriter text="Live on port 3000!" delay={60} />'</span>);<br />
+                      &#125;);
+                    </code>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
           </div>
 
           <div className="hero-stats">
