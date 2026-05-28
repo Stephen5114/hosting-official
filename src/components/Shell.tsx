@@ -226,10 +226,26 @@ export function LocalizationProvider({ children, lang }: { children: React.React
 export function LayoutShell({ children }: { children: React.ReactNode }) {
   const { currentLang, currentCurrency, t, openLangModal } = useLocalization();
   const [isNotHome, setIsNotHome] = useState(false);
+  const [contactEmail, setContactEmail] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setIsNotHome(window.location.pathname !== "/");
   }, []);
+
+  const handleEmailClick = (e: React.MouseEvent<HTMLAnchorElement>, email: string) => {
+    e.preventDefault();
+    setContactEmail(email);
+    setCopied(false);
+  };
+
+  const handleCopyEmail = () => {
+    if (contactEmail) {
+      navigator.clipboard.writeText(contactEmail);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   const developingLink = "/" + currentLang.toLowerCase() + "/developing";
 
@@ -295,10 +311,10 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
             <div className="footer-col">
               <h4 className="footer-heading">{t("helpSupport")}</h4>
               <ul className="footer-list">
-                <li><a href="mailto:support@hostvibecoding.com">{t("emailSupport")}</a></li>
+                <li><a href="#" onClick={(e) => handleEmailClick(e, "support@hostvibecoding.com")}>{t("emailSupport")}</a></li>
                 <li><a href={developingLink}>{t("knowBase")}</a></li>
                 <li><a href={developingLink}>{t("ticketSystem")}</a></li>
-                <li><a href="mailto:contact@hostvibecoding.com">{t("contactUs")}</a></li>
+                <li><a href="#" onClick={(e) => handleEmailClick(e, "contact@hostvibecoding.com")}>{t("contactUs")}</a></li>
                 <li><a href={developingLink}>{t("platStatus")}</a></li>
               </ul>
             </div>
@@ -367,6 +383,91 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </footer>
+
+      {/* Contact Email Dialog Modal */}
+      {contactEmail && (
+        <div className="lang-modal-overlay" onClick={() => setContactEmail(null)}>
+          <div className="lang-modal-box" style={{ maxWidth: "440px", width: "90%", textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+              <div className="contact-glow-icon" style={{
+                display: "inline-grid",
+                placeItems: "center",
+                width: "56px",
+                height: "56px",
+                borderRadius: "50%",
+                background: "rgba(56, 189, 248, 0.1)",
+                color: "#38bdf8",
+                boxShadow: "0 0 20px rgba(56, 189, 248, 0.2)",
+                border: "1px solid rgba(56, 189, 248, 0.3)"
+              }}>
+                <Globe2 size={24} />
+              </div>
+              <h3 className="lang-modal-title" style={{ margin: 0 }}>
+                {contactEmail === "support@hostvibecoding.com" ? t("emailSupport") : t("contactUs")}
+              </h3>
+              <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", margin: 0 }}>
+                {t("contactDesc")}
+              </p>
+            </div>
+
+            <div className="contact-email-container" style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: "rgba(255, 255, 255, 0.03)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius-md)",
+              padding: "12px 16px",
+              margin: "16px 0",
+              gap: "12px"
+            }}>
+              <span className="mono-email" style={{
+                fontFamily: "Consolas, Monaco, monospace",
+                fontSize: "0.95rem",
+                fontWeight: 600,
+                color: "var(--text)",
+                wordBreak: "break-all"
+              }}>{contactEmail}</span>
+              <button 
+                className="btn btn-secondary btn-sm" 
+                style={{ minWidth: "70px", height: "32px", padding: "0 10px", margin: 0 }}
+                onClick={handleCopyEmail}
+              >
+                {copied ? "✔" : t("copy")}
+              </button>
+            </div>
+
+            {copied && (
+              <div className="success-copy-text" style={{
+                fontSize: "0.82rem",
+                color: "var(--green)",
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+                marginTop: "-8px"
+              }}>
+                <Check size={14} /> {t("copiedSuccess")}
+              </div>
+            )}
+
+            <div className="lang-modal-actions" style={{ marginTop: "24px", justifyContent: "center", width: "100%" }}>
+              <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setContactEmail(null)}>
+                {t("close")}
+              </button>
+              <a 
+                className="btn btn-primary" 
+                style={{ flex: 1, textDecoration: "none", display: "inline-flex", justifyContent: "center", alignItems: "center", gap: "6px" }} 
+                href={`mailto:${contactEmail}`}
+                onClick={() => setContactEmail(null)}
+              >
+                {t("openMailApp")} <ArrowRight size={15} />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
