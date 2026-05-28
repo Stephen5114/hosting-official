@@ -748,6 +748,58 @@ button, input {
 .orange-text { color: #fb923c; }
 .gold-text { color: #fbbf24; }
 
+/* Animated Cybernetic Typing Hands */
+.cyber-hand {
+  position: absolute;
+  bottom: 12px; /* Overlap nicely on the keyboard */
+  width: 68px;
+  height: 54px;
+  color: rgba(56, 189, 248, 0.85); /* Neon Cyber Blue */
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.65)) drop-shadow(0 0 2px rgba(56, 189, 248, 0.4));
+  z-index: 6; /* Render on top of the keyboard (z-index 5) */
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  transform-style: preserve-3d;
+}
+
+.cyber-hand-left {
+  left: 20%;
+  animation: type-left-hand 0.16s infinite alternate ease-in-out;
+  transform-origin: bottom center;
+}
+
+.cyber-hand-right {
+  right: 20%;
+  animation: type-right-hand 0.14s infinite alternate 0.04s ease-in-out;
+  transform-origin: bottom center;
+}
+
+@keyframes type-left-hand {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(0.95);
+    color: rgba(56, 189, 248, 0.85);
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.65));
+  }
+  100% {
+    transform: translateY(-5px) rotate(-3deg) scale(1.02);
+    color: rgba(167, 139, 250, 0.95); /* Transitions to neon purple on press */
+    filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.85));
+  }
+}
+
+@keyframes type-right-hand {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(0.95);
+    color: rgba(56, 189, 248, 0.85);
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.65));
+  }
+  100% {
+    transform: translateY(-6px) rotate(4deg) scale(1.03);
+    color: rgba(167, 139, 250, 0.95); /* Transitions to neon purple on press */
+    filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.85));
+  }
+}
+
 /* Responsive Media Queries */
 @media (max-width: 1024px) {
   .hero-split-wrapper {

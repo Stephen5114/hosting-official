@@ -277,6 +277,27 @@ function HomeContent() {
                         <span key={i} className={`key key-${(i % 5) + 1}`} />
                       ))}
                     </div>
+
+                    {/* Animated Cybernetic Typing Hands */}
+                    <svg className="cyber-hand cyber-hand-left" viewBox="0 0 100 80" fill="none" stroke="currentColor">
+                      <path d="M10 75 L30 65 L40 68" strokeWidth="2.5" strokeLinecap="round" />
+                      <path d="M30 65 L45 35 L65 40 L55 68 Z" strokeWidth="2.5" strokeLinejoin="round" />
+                      <path d="M30 60 L15 50 L10 42" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M45 35 L42 15 L40 5" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M52 36 L52 10 L52 0" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M58 38 L60 14 L62 4" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M64 41 L70 20 L74 12" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+
+                    <svg className="cyber-hand cyber-hand-right" viewBox="0 0 100 80" fill="none" stroke="currentColor">
+                      <path d="M90 75 L70 65 L60 68" strokeWidth="2.5" strokeLinecap="round" />
+                      <path d="M70 65 L55 35 L35 40 L45 68 Z" strokeWidth="2.5" strokeLinejoin="round" />
+                      <path d="M70 60 L85 50 L90 42" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M55 35 L58 15 L60 5" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M48 36 L48 10 L48 0" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M42 38 L40 14 L38 4" strokeWidth="2" strokeLinecap="round" />
+                      <path d="M36 41 L30 20 L26 12" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
                   </div>
                 </div>
 
