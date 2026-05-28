@@ -655,9 +655,9 @@ button, input {
 .floating-code-block {
   position: absolute;
   border-radius: var(--radius-md);
-  background: rgba(9, 9, 11, 0.85);
+  background: rgba(9, 9, 11, 0.55); /* High transparency so it does not block the card */
   border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(20px);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
   font-family: Consolas, Monaco, "Andale Mono", monospace;
   font-size: 0.72rem;
@@ -713,8 +713,8 @@ button, input {
 /* Individual Block Parallax Formulas (using GPU acceleration) */
 .block-terminal {
   width: 250px;
-  top: -20px;
-  left: -80px;
+  top: -45px;
+  left: -140px;
   /* Scroll speed: 0.22 */
   transform: translate3d(0, calc(var(--scroll-y, 0px) * -0.22px), 0);
   transition: transform 0.1s cubic-bezier(0.1, 0.8, 0.2, 1);
@@ -722,8 +722,8 @@ button, input {
 
 .block-json {
   width: 190px;
-  bottom: -40px;
-  left: -50px;
+  bottom: -15px;
+  left: -160px;
   /* Scroll speed: -0.15 */
   transform: translate3d(0, calc(var(--scroll-y, 0px) * 0.15px), 0);
   transition: transform 0.1s cubic-bezier(0.1, 0.8, 0.2, 1);
@@ -731,8 +731,8 @@ button, input {
 
 .block-api {
   width: 240px;
-  bottom: 20px;
-  right: -90px;
+  bottom: 65px;
+  right: -150px;
   /* Scroll speed: 0.12 */
   transform: translate3d(0, calc(var(--scroll-y, 0px) * -0.12px), 0);
   transition: transform 0.1s cubic-bezier(0.1, 0.8, 0.2, 1);
