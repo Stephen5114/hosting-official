@@ -1,0 +1,463 @@
+"use client";
+import {
+  ArrowRight,
+  Check,
+  Cloud,
+  Code2,
+  HardDrive,
+  Files,
+  Layers,
+  LayoutDashboard,
+  LifeBuoy,
+  ServerCog,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { CatalogResponse, HostingPlan, fetchCatalog, registerLead } from "../../api";
+import { LocalizationProvider, LayoutShell, useLocalization } from "../../components/Shell";
+
+const customerPanelUrl =
+  (process.env.NEXT_PUBLIC_CUSTOMER_PANEL_URL as string | undefined) ?? "https://cp.hostvibecoding.com";
+
+const fallbackCatalog: CatalogResponse = {
+  plans: [
+    {
+      slug: "basic",
+      name: "Basic",
+      description: "Perfect for your first vibe-coded project. One site, zero hassle.",
+      recommendedSiteLimit: 1,
+      diskLimitMb: 1024,
+      fileLimitCount: 50000,
+      monthlyPrice: 12.99,
+      nodeType: "web",
+    },
+    {
+      slug: "pro",
+      name: "Pro",
+      description: "Ship multiple projects at once. Ideal for prolific vibe coders and small teams.",
+      recommendedSiteLimit: 3,
+      diskLimitMb: 5120,
+      fileLimitCount: 150000,
+      monthlyPrice: 29.99,
+      nodeType: "web",
+    },
+    {
+      slug: "enterprise",
+      name: "Enterprise",
+      description: "For power builders running a portfolio of AI-built apps and client projects.",
+      recommendedSiteLimit: 10,
+      diskLimitMb: 20480,
+      fileLimitCount: 500000,
+      monthlyPrice: 89.99,
+      nodeType: "web",
+    },
+  ],
+  regions: [{ slug: "global", name: "Global", availableNodeCount: 1, isDefault: true }],
+};
+
+export default function App({ params }: { params: { lang: string } }) {
+  return (
+    <LocalizationProvider lang={params?.lang}>
+      <HomeContent />
+    </LocalizationProvider>
+  );
+}
+
+function HomeContent() {
+  const router = useRouter();
+  const { t, formatPrice } = useLocalization();
+
+  const [catalog, setCatalog] = useState<CatalogResponse>(fallbackCatalog);
+  const [loadingCatalog, setLoadingCatalog] = useState(true);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchCatalog()
+      .then((response) => setCatalog(normalizeCatalog(response)))
+      .catch((error: unknown) =>
+        setCatalogError(error instanceof Error ? error.message : "Cannot connect to backend.")
+      )
+      .finally(() => setLoadingCatalog(false));
+  }, []);
+
+  const defaultRegion = useMemo(
+    () => catalog.regions.find((r) => r.isDefault) ?? catalog.regions[0],
+    [catalog.regions]
+  );
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitting(true);
+    setFormError(null);
+    setSuccessMessage(null);
+
+    try {
+      const result = await registerLead({ email, password });
+      const normalizedEmail = email.trim().toLowerCase();
+      setSuccessMessage(result.message ? t("submitSuccess") : t("submitSuccess"));
+      setEmail("");
+      setPassword("");
+
+      if (result.requiresEmailVerification) {
+        const params = new URLSearchParams({ email: normalizedEmail });
+        if (result.verificationPreviewUrl) {
+          params.set("preview", result.verificationPreviewUrl);
+        }
+        router.push(`/check-email?${params.toString()}`);
+        return;
+      }
+
+      const loginUrl = new URL(`${customerPanelUrl}/login`);
+      if (normalizedEmail) {
+        loginUrl.searchParams.set("email", normalizedEmail);
+      }
+      window.location.href = loginUrl.toString();
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : t("submitError"));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <LayoutShell>
+      <main>
+        <section className="hero container" id="top">
+          <div className="hero-badge">
+            <span className="dot" />
+            {t("builtForVibeCoders")}
+          </div>
+          <h1>
+            {t("heroTitle").split("").map((char, index) => (
+              <span
+                key={index}
+                style={{ animationDelay: `${index * 0.05}s` }}
+                className="reveal-char"
+              >
+                {char === " " ? "\u00A0" : char}
+              </span>
+            ))}
+          </h1>
+          <p className="hero-sub">
+            {t("heroSub")}
+          </p>
+          <div className="tech-stack">
+            <span className="tech-pill">.NET / ASP.NET</span>
+            <span className="tech-pill">Python</span>
+            <span className="tech-pill">PHP</span>
+            <span className="tech-pill">Spring Boot</span>
+            <span className="tech-pill">{t("staticSites")}</span>
+          </div>
+          <div className="hero-actions">
+            <a className="btn btn-primary btn-lg" href="#launch">
+              {t("startDeploying")} <ArrowRight size={18} />
+            </a>
+            <a className="btn btn-secondary btn-lg" href={`${customerPanelUrl}/login`} target="_blank" rel="noreferrer">
+              {t("controlPanel")}
+            </a>
+          </div>
+
+          <div className="hero-stats">
+            <div className="stat-cell">
+              <div className="stat-value">{catalog.plans.length}</div>
+              <div className="stat-label">{loadingCatalog ? t("loading") : t("readyPlans")}</div>
+            </div>
+            <div className="stat-cell">
+              <div className="stat-value">
+                {defaultRegion?.slug === "global" ? t("globalRegion") : defaultRegion?.name ?? t("globalRegion")}
+              </div>
+              <div className="stat-label">{t("deployRegion")}</div>
+            </div>
+            <div className="stat-cell">
+              <div className="stat-value">{t("seconds")}</div>
+              <div className="stat-label">{t("fromDeployToLive")}</div>
+            </div>
+          </div>
+
+          {catalogError && (
+            <div className="notice warning" style={{ marginTop: 20, textAlign: "left" }}>
+              {t("catalogFallback")} {catalogError}
+            </div>
+          )}
+        </section>
+
+        <hr className="section-divider container" />
+
+        <section className="section container" id="plans">
+          <div className="section-header">
+            <div className="section-label">
+              <Zap size={14} /> {t("pricing")}
+            </div>
+            <h2>{t("pricingTitle")}</h2>
+            <p className="section-desc">
+              {t("pricingSub")}
+            </p>
+          </div>
+
+          <div className="plan-grid">
+            {catalog.plans.map((plan) => (
+              <PlanCard key={plan.slug} plan={plan} featured={plan.slug === "pro"} formatPrice={formatPrice} t={t} />
+            ))}
+          </div>
+        </section>
+
+        <hr className="section-divider container" />
+
+        <section className="section container" id="platform">
+          <div className="section-header">
+            <div className="section-label">
+              <ServerCog size={14} /> {t("platformTitle")}
+            </div>
+            <h2>{t("platformSub")}</h2>
+            <p className="section-desc">
+              {t("platformDesc")}
+            </p>
+          </div>
+
+          <div className="feature-grid">
+            <FeatureCard
+              icon={<Layers size={20} />}
+              title={t("feat1Title")}
+              body={t("feat1Body")}
+            />
+            <FeatureCard
+              icon={<ShieldCheck size={20} />}
+              title={t("feat2Title")}
+              body={t("feat2Body")}
+            />
+            <FeatureCard
+              icon={<Cloud size={20} />}
+              title={t("feat3Title")}
+              body={t("feat3Body")}
+            />
+            <FeatureCard
+              icon={<LifeBuoy size={20} />}
+              title={t("feat4Title")}
+              body={t("feat4Body")}
+            />
+          </div>
+        </section>
+
+        <hr className="section-divider container" />
+
+        <section className="section container" id="onboarding">
+          <div className="section-header">
+            <div className="section-label">
+              <LayoutDashboard size={14} /> {t("timeline")}
+            </div>
+            <h2>{t("onboarding")}</h2>
+          </div>
+
+          <div className="timeline">
+            <TimelineItem step="01" title={t("timeline1Title")} body={t("timeline1Body")} />
+            <TimelineItem step="02" title={t("timeline2Title")} body={t("timeline2Body")} />
+            <TimelineItem step="03" title={t("timeline3Title")} body={t("timeline3Body")} />
+            <TimelineItem step="04" title={t("timeline4Title")} body={t("timeline4Body")} />
+          </div>
+        </section>
+
+        <hr className="section-divider container" />
+
+        <section className="cta-section container" id="launch">
+          <div className="cta-wrapper">
+            <div className="cta-copy">
+              <div className="section-label">
+                <ArrowRight size={14} /> {t("getStarted")}
+              </div>
+              <h2>{t("shipNext")}</h2>
+              <p>
+                {t("ctaDesc")}
+              </p>
+              <ul className="cta-checklist">
+                <li><Check size={16} /> {t("ctaCheck1")}</li>
+                <li><Check size={16} /> {t("ctaCheck2")}</li>
+                <li><Check size={16} /> {t("ctaCheck3")}</li>
+                <li><Check size={16} /> {t("ctaCheck4")}</li>
+              </ul>
+            </div>
+
+            <form className="cta-form" onSubmit={handleSubmit}>
+              <label>
+                <span>{t("email")}</span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t("emailPlaceholder")}
+                  required
+                />
+              </label>
+              <label>
+                <span>{t("password")}</span>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={t("passwordPlaceholder")}
+                  minLength={8}
+                  required
+                />
+              </label>
+              <button type="submit" className="btn btn-primary" disabled={submitting}>
+                {submitting ? t("submitting") : t("startDeploying")}
+              </button>
+              {formError && <div className="notice danger">{formError}</div>}
+              {successMessage && <div className="notice success">{successMessage}</div>}
+              <div className="cta-links">
+                <a href={`${customerPanelUrl}/register`} target="_blank" rel="noreferrer">
+                  {t("openPortal")}
+                </a>
+                <a href={`${customerPanelUrl}/login`} target="_blank" rel="noreferrer">
+                  {t("signIn")}
+                </a>
+              </div>
+            </form>
+          </div>
+        </section>
+      </main>
+    </LayoutShell>
+  );
+}
+
+function PlanCard({
+  plan,
+  featured,
+  formatPrice,
+  t,
+}: {
+  plan: HostingPlan;
+  featured: boolean;
+  formatPrice: (usdPrice: number) => React.ReactNode;
+  t: (key: string) => string;
+}) {
+  const tDescription = () => {
+    if (plan.slug === "basic") return t("basic_desc") !== "basic_desc" ? t("basic_desc") : plan.description;
+    if (plan.slug === "pro") return t("pro_desc") !== "pro_desc" ? t("pro_desc") : plan.description;
+    if (plan.slug === "enterprise") return t("ent_desc") !== "ent_desc" ? t("ent_desc") : plan.description;
+    return plan.description;
+  };
+
+  return (
+    <article className={`plan-card${featured ? " featured" : ""}`}>
+      <span className={`plan-tag ${featured ? "popular" : "default"}`}>
+        {featured ? t("mostPopular") : t("starter")}
+      </span>
+      <div className="plan-name">{plan.slug === "pro" ? t("proPlanName") : plan.slug === "enterprise" ? t("entPlanName") : t("basicPlanName")}</div>
+      <div className="plan-description">{tDescription()}</div>
+      <div className="plan-price">
+        {formatPrice(plan.monthlyPrice)}
+      </div>
+      <div className="plan-period">{t("perMonth")}</div>
+      <div className="plan-features">
+        <div className="plan-feature">
+          <Check size={16} />
+          {formatSiteCount(plan.recommendedSiteLimit, t)}
+        </div>
+        <div className="plan-feature">
+          <HardDrive size={16} />
+          {formatDisk(plan.diskLimitMb, t)} {t("storage")}
+        </div>
+        <div className="plan-feature">
+          <Files size={16} />
+          {formatFiles(plan.fileLimitCount, t)}
+        </div>
+        <div className="plan-feature">
+          <Code2 size={16} />
+          .NET, Python, PHP, Spring Boot
+        </div>
+      </div>
+      <a className={`btn ${featured ? "btn-primary" : "btn-secondary"}`} href="#launch">
+        {t("getStarted")} <ArrowRight size={16} />
+      </a>
+    </article>
+  );
+}
+
+function FeatureCard({
+  icon,
+  title,
+  body,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+}) {
+  return (
+    <article className="feature-card">
+      <div className="feature-icon">{icon}</div>
+      <h3>{title}</h3>
+      <p>{body}</p>
+    </article>
+  );
+}
+
+function TimelineItem({
+  step,
+  title,
+  body,
+}: {
+  step: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <article className="timeline-item">
+      <span className="timeline-step">{step}</span>
+      <div>
+        <h3>{title}</h3>
+        <p>{body}</p>
+      </div>
+    </article>
+  );
+}
+
+function normalizeCatalog(catalog: CatalogResponse): CatalogResponse {
+  return {
+    ...catalog,
+    plans: catalog.plans.map((plan) => ({
+      ...plan,
+      recommendedSiteLimit:
+        plan.recommendedSiteLimit > 0
+          ? plan.recommendedSiteLimit
+          : (fallbackCatalog.plans.find((item) => item.slug === plan.slug)?.recommendedSiteLimit ?? 1),
+      diskLimitMb:
+        plan.diskLimitMb > 0
+          ? plan.diskLimitMb
+          : (fallbackCatalog.plans.find((item) => item.slug === plan.slug)?.diskLimitMb ?? 0),
+      fileLimitCount:
+        plan.fileLimitCount > 0
+          ? plan.fileLimitCount
+          : (fallbackCatalog.plans.find((item) => item.slug === plan.slug)?.fileLimitCount ?? 0),
+    })),
+  };
+}
+
+function formatSiteCount(value: number, t: (key: string) => string) {
+  return `${value} ${value === 1 ? t("siteLabel") : t("sitesLabel")}`;
+}
+
+function formatDisk(value: number, t: (key: string) => string) {
+  if (value <= 0) return t("customDisk");
+  if (value >= 1024) {
+    const gb = value / 1024;
+    return `${Number.isInteger(gb) ? gb : gb.toFixed(1)} GB`;
+  }
+  return `${value} MB`;
+}
+
+function formatFiles(value: number, t: (key: string) => string) {
+  if (value <= 0) return t("customFiles");
+  if (value >= 1000) {
+    const scaled = value / 1000;
+    return `${Number.isInteger(scaled) ? scaled : scaled.toFixed(1)}k ${t("filesLabel")}`;
+  }
+  return `${value} ${t("filesLabel")}`;
+}
+
