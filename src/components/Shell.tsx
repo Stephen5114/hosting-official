@@ -248,6 +248,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
   };
 
   const developingLink = "/" + currentLang.toLowerCase() + "/developing";
+  const statusLink = "/" + currentLang.toLowerCase() + "/status";
 
   return (
     <>
@@ -313,7 +314,7 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
               <ul className="footer-list">
                 <li><a href={developingLink}>{t("knowBase")}</a></li>
                 <li><a href="#" onClick={(e) => handleEmailClick(e, "contact@hostvibecoding.com")}>{t("contactUs")}</a></li>
-                <li><a href={developingLink}>{t("platStatus")}</a></li>
+                <li><a href={statusLink}>{t("platStatus")}</a></li>
               </ul>
             </div>
 

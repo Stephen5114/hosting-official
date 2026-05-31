@@ -2175,3 +2175,9 @@ button, input {
 .stagger-2 { transition-delay: 160ms; }
 .stagger-3 { transition-delay: 240ms; }
 .stagger-4 { transition-delay: 320ms; }
+
+/* 3. Platform Status Uptime Ticks Micro-Animation */
+@keyframes pulse-uptime {
+  0% { transform: scaleY(0.92); opacity: 0.85; }
+  100% { transform: scaleY(1.08); opacity: 1; }
+}
