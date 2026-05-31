@@ -311,7 +311,6 @@ export function LayoutShell({ children }: { children: React.ReactNode }) {
             <div className="footer-col">
               <h4 className="footer-heading">{t("helpSupport")}</h4>
               <ul className="footer-list">
-                <li><a href="#" onClick={(e) => handleEmailClick(e, "support@hostvibecoding.com")}>{t("emailSupport")}</a></li>
                 <li><a href={developingLink}>{t("knowBase")}</a></li>
                 <li><a href="#" onClick={(e) => handleEmailClick(e, "contact@hostvibecoding.com")}>{t("contactUs")}</a></li>
                 <li><a href={developingLink}>{t("platStatus")}</a></li>
